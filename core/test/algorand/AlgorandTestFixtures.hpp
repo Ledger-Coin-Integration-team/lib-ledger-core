@@ -95,14 +95,14 @@ namespace algorand {
             tx.header.firstValid = 6529846;
             tx.header.lastValid = 6530846;
             tx.header.timestamp = 1588586190;
+            tx.header.senderRewards = Option<uint64_t>(0);
+            tx.header.receiverRewards = Option<uint64_t>(0);
+            tx.header.closeRewards = Option<uint64_t>(0);
 
             tx.details = model::PaymentTxnFields();
             auto& details = boost::get<model::PaymentTxnFields>(tx.details);
             details.receiverAddr = Address(TEST_ACCOUNT_ADDRESS);
             details.amount = 1000;
-            details.receiverRewards = Option<uint64_t>(0);
-            details.closeRewards = Option<uint64_t>(0);
-            details.fromRewards = Option<uint64_t>(0);
         }
 
         return tx;
@@ -124,6 +124,9 @@ namespace algorand {
             tx.header.firstValid = 6305874;
             tx.header.lastValid = 6306874;
             tx.header.timestamp = 1587641643;
+            tx.header.senderRewards = Option<uint64_t>(0);
+            tx.header.receiverRewards = Option<uint64_t>(0);
+            tx.header.closeRewards = Option<uint64_t>(0);
 
             tx.details = model::AssetConfigTxnFields();
             auto& details = boost::get<model::AssetConfigTxnFields>(tx.details);
@@ -160,6 +163,9 @@ namespace algorand {
             tx.header.firstValid = 6734094;
             tx.header.lastValid = 6734193;
             tx.header.timestamp = 1589448692;
+            tx.header.senderRewards = Option<uint64_t>(0);
+            tx.header.receiverRewards = Option<uint64_t>(0);
+            tx.header.closeRewards = Option<uint64_t>(0);
 
             tx.details = model::AssetTransferTxnFields();
             auto& details = boost::get<model::AssetTransferTxnFields>(tx.details);
@@ -194,11 +200,8 @@ namespace algorand {
 
         EXPECT_EQ(txRefPaymentDetails.amount, txResultPaymentDetails.amount);
         EXPECT_EQ(txRefPaymentDetails.receiverAddr, txResultPaymentDetails.receiverAddr);
-        if (txRefPaymentDetails.receiverRewards.hasValue()) EXPECT_EQ(*txRefPaymentDetails.receiverRewards, *txResultPaymentDetails.receiverRewards);
         if (txRefPaymentDetails.closeAddr.hasValue()) EXPECT_EQ(*txRefPaymentDetails.closeAddr, *txResultPaymentDetails.closeAddr);
         if (txRefPaymentDetails.closeAmount.hasValue()) EXPECT_EQ(*txRefPaymentDetails.closeAmount, *txResultPaymentDetails.closeAmount);
-        if (txRefPaymentDetails.closeRewards.hasValue()) EXPECT_EQ(*txRefPaymentDetails.closeRewards, *txResultPaymentDetails.closeRewards);
-        if (txRefPaymentDetails.fromRewards.hasValue()) EXPECT_EQ(*txRefPaymentDetails.fromRewards, *txResultPaymentDetails.fromRewards);
     }
 
     static void assertSameAssetConfigDetails(const model::Transaction::Details & txRefDetails,
@@ -229,12 +232,14 @@ namespace algorand {
         EXPECT_EQ(txRef.header.sender, txResult.header.sender);
         EXPECT_EQ(txRef.header.type, txResult.header.type);
         if (txRef.header.round.hasValue()) EXPECT_EQ(*txRef.header.round, *txResult.header.round);
-        // FIXME Restore this when PureStake provides it
-        //if (txRef.header.timestamp.hasValue()) EXPECT_EQ(*txRef.header.timestamp, *txResult.header.timestamp);
+        if (txRef.header.timestamp.hasValue()) EXPECT_EQ(*txRef.header.timestamp, *txResult.header.timestamp);
         if (txRef.header.note.hasValue()) EXPECT_EQ(*txRef.header.note, *txResult.header.note);
         EXPECT_EQ(txRef.header.genesisHash, txResult.header.genesisHash);
         EXPECT_EQ(txRef.header.firstValid, txResult.header.firstValid);
         EXPECT_EQ(txRef.header.lastValid, txResult.header.lastValid);
+        if (txRef.header.senderRewards.hasValue()) EXPECT_EQ(*txRef.header.senderRewards, *txResult.header.senderRewards);
+        if (txRef.header.receiverRewards.hasValue()) EXPECT_EQ(*txRef.header.receiverRewards, *txResult.header.receiverRewards);
+        if (txRef.header.closeRewards.hasValue()) EXPECT_EQ(*txRef.header.closeRewards, *txResult.header.closeRewards);
 
         if (txResult.header.type == constants::xPay) {
             assertSamePaymentDetails(txRef.details, txResult.details);
