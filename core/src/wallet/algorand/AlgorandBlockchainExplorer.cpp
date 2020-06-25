@@ -29,6 +29,7 @@
 
 #include "AlgorandBlockchainExplorer.hpp"
 #include "AlgorandJsonParser.hpp"
+#include "AlgorandExplorerConstants.hpp"
 #include <api/AlgorandConfigurationDefaults.hpp>
 
 #include <api/Configuration.hpp>
@@ -36,6 +37,21 @@
 namespace ledger {
 namespace core {
 namespace algorand {
+
+    namespace constants {
+
+        static const std::string purestakeTokenHeader = "x-api-key";
+
+        // Explorer endpoints
+        static const std::string purestakeTransactionsEndpoint = "/ps2/v2/transactions";
+        static const std::string purestakeTransactionsParamsEndpoint = "/ps2/v2/transactions/params";
+        static const std::string purestakeAccountEndpoint = "/ps2/v2/accounts/{}";
+        static const std::string purestakeBlockEndpoint = "/idx2/v2/blocks/{}";
+        static const std::string purestakeAccountTransactionsEndpoint = "/idx2/v2/accounts/{}/transactions";
+        static const std::string purestakeTransactionEndpoint = "/idx2/v2/transactions?txid={}";
+        static const std::string purestakeAssetEndpoint = "/idx2/v2/assets/{}";
+
+    } // namespace constants
 
     BlockchainExplorer::BlockchainExplorer(
             const std::shared_ptr<api::ExecutionContext>& context,
@@ -61,17 +77,6 @@ namespace algorand {
                     JsonParser::parseBlock(json, block);
                     return block;
             });
-            /*// NOTE: In case we actually need to retrieve blocks for each tx... (untested!)
-            // Add block information to the transaction
-            .template flatMap<model::Transaction>(getContext(), [this](const model::Transaction &tx) -> Future<model::Transaction> {
-                auto output = model::Transaction(tx);
-                return getBlock(tx.header.round.getValue())
-                    .map<model::Transaction>(getContext(), [output](const api::Block &block) mutable {
-                        output.header.block = block;
-                        return output;
-                    });
-            });
-            */
     }
 
     Future<model::Account> BlockchainExplorer::getAccount(const std::string& address) const
@@ -104,8 +109,14 @@ namespace algorand {
     BlockchainExplorer::getTransactionById(const std::string & txId) const {
         return _http->GET(fmt::format(constants::purestakeTransactionEndpoint, txId))
             .json(false)
-            .map<model::Transaction>(getContext(), [](const HttpRequest::JsonResult& response) {
-                    const auto& json = std::get<1>(response)->GetObject();
+            .map<model::Transaction>(getContext(), [&txId](const HttpRequest::JsonResult& response) {
+                    const auto& jsonArray = std::get<1>(response)->GetObject()[constants::xTransactions.c_str()].GetArray();
+                    if (jsonArray.Size() != 1) {
+                        throw make_exception(api::ErrorCode::TRANSACTION_NOT_FOUND,
+                                             fmt::format("Couldn't find transaction {}", txId));
+                    }
+
+                    const auto& json = *std::begin(jsonArray);
                     auto tx = model::Transaction();
                     JsonParser::parseTransaction(json, tx);
                     return tx;
@@ -114,16 +125,16 @@ namespace algorand {
 
     Future<model::TransactionsBulk>
     BlockchainExplorer::getTransactionsForAddress(const std::string & address,
-                                                  const Option<uint64_t> & firstRound,
-                                                  const Option<uint64_t> & lastRound) const
+                                                  const Option<uint64_t> & minRound,
+                                                  const Option<uint64_t> & maxRound) const
     {
         auto url = fmt::format(constants::purestakeAccountTransactionsEndpoint, address);
-        if (firstRound && lastRound) {
-            url = fmt::format("{}?firstRound={}&lastRound={}", url, *firstRound, *lastRound);
-        } else if (firstRound) {
-            url = fmt::format("{}?firstRound={}", url, *firstRound);
-        } else if (lastRound) {
-            url = fmt::format("{}?lastRound={}", url, *lastRound);
+        url = fmt::format("{}?limit={}", url, constants::EXPLORER_QUERY_LIMIT);
+        // Apply the offset if required
+        if (minRound) {
+            url = fmt::format("{}&min-round={}", url, *minRound);
+        } else if (maxRound) {
+            url = fmt::format("{}&max-round={}", url, *maxRound);
         }
 
         return _http->GET(url)
@@ -137,36 +148,6 @@ namespace algorand {
                     txs.hasNext = txs.transactions.size() >= constants::EXPLORER_QUERY_LIMIT;
                     return txs;
             });
-            /*// NOTE: In case we actually need to retrieve blocks for each tx... (untested!)
-            .template flatMap<model::TransactionsBulk>(getContext(), [this](const model::TransactionsBulk & txs) -> Future<model::TransactionsBulk> {
-                // - build set of (unique) blockHeights to fetch
-                const auto blockHeights = vector::map<uint64_t, model::Transaction>(txs.transactions,
-                    [](const model::Transaction& tx) {
-                        return tx.header.round.getValue();
-                    });
-                const std::unordered_set<uint64_t> uniqueBlockHeights(blockHeights.begin(), blockHeights.end());
-                // - build vector of promises for each block
-                std::vector<Future<api::Block>> blockPromises;
-                for (auto blockHeight : uniqueBlockHeights) {
-                    blockPromises.push_back(getBlock(blockHeight));
-                }
-                // - async::sequence
-                return async::sequence(getContext(), blockPromises)
-                    .flatMap<model::TransactionsBulk>(getContext(), [&txs](const std::vector<api::Block> & blocks) {
-                        // - build map of <blockHeight, api::Block> ?
-                        //auto blockPerHeight = std::unordered_map<uint64_t, api::Block>();
-                        auto txsMutable = const_cast<model::TransactionsBulk &>(txs);
-                        for (auto& tx : txsMutable.transactions) {
-                            for (const auto& block : blocks) {
-                                if (tx.header.round.getValue() == block.height) {
-                                    tx.header.block = block;
-                                }
-                            }
-                        }
-                        return Future<model::TransactionsBulk>::successful(txsMutable);
-                    });
-            });
-            */
     }
 
     Future<model::TransactionParams> BlockchainExplorer::getTransactionParams() const
@@ -193,3 +174,4 @@ namespace algorand {
 }  // namespace algorand
 }  // namespace core
 }  // namespace ledger
+
