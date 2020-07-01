@@ -67,8 +67,14 @@ namespace model {
 
     std::vector<uint8_t> SignedTransaction::serialize() const
     {
+        /*
         std::stringstream ss;
         msgpack::pack(ss, *this);
+        */
+        std::stringstream ss;
+        if (!sig) {
+            msgpack::pack(ss, txn);
+        }
         const auto str = ss.str();
 
         return { std::begin(str), std::end(str) };
