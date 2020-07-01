@@ -74,6 +74,8 @@ namespace model {
         std::stringstream ss;
         if (!sig) {
             msgpack::pack(ss, txn);
+        } else {
+            msgpack::pack(ss, *this);
         }
         const auto str = ss.str();
 
