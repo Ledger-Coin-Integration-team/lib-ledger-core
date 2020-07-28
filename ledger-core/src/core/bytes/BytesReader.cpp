@@ -114,6 +114,10 @@ namespace ledger {
             return oss.str();
         }
 
+        int32_t BytesReader::readNextBeInt() {
+            return readNextValue<int32_t, endianness::Endianness::BIG>();
+        }
+
         uint32_t BytesReader::readNextBeUint() {
             uint32_t result;
             uint8_t* ptr = reinterpret_cast<uint8_t *>(&result);
@@ -138,6 +142,9 @@ namespace ledger {
             return result;
         }
 
+        int64_t BytesReader::readNextBeLong() {
+            return readNextValue<int64_t, endianness::Endianness::BIG>();
+        }
         uint64_t BytesReader::readNextBeUlong() {
             uint64_t result;
             uint8_t* ptr = reinterpret_cast<uint8_t *>(&result);
@@ -212,5 +219,22 @@ namespace ledger {
                 seek(1, Seek::CUR);
             }
         }
+    
+        uint16_t BytesReader::readNextBeUint16() {
+            return readNextValue<uint16_t, endianness::Endianness::BIG>();
+        }
+
+        uint16_t BytesReader::readNextLeUint16() {
+            return readNextValue<uint16_t, endianness::Endianness::LITTLE>();
+        }
+
+        int16_t BytesReader::readNextBeInt16() {
+            return readNextValue<int16_t, endianness::Endianness::BIG>();
+        }
+
+        int16_t BytesReader::readNextLeInt16() {
+            return readNextValue<int16_t, endianness::Endianness::LITTLE>();
+        }
+
     }
 }

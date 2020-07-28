@@ -41,7 +41,7 @@ namespace ledger {
             _currency(currency), _path(path) {
         }
 
-        api::Currency Address::getCurrency() {
+        api::Currency Address::getCurrency() const {
             return _currency;
         }
 
