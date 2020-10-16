@@ -1,6 +1,18 @@
 cmake_minimum_required(VERSION 3.15)
 project(ledger-core)
 
+if (BUILD_TESTS AND UNIX AND NOT ANDROID)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fprofile-arcs -ftest-coverage")
+    if (NOT APPLE)
+        set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -lgcov")
+    else()
+        set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wall -fprofile-arcs -ftest-coverage")
+    endif()
+elseif(MINGW OR MSVC)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /MP")
+endif()
+
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 option(TARGET_JNI "Indicates wheter or not the toolchain must build for JNI or not" OFF)
 option(BUILD_TESTS "Indicates wheter or not the toolchain must build the test or not" ON)

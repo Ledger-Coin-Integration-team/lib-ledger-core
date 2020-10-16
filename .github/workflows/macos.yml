@@ -1,0 +1,152 @@
+name: macOS
+
+on:
+  # At the moment, only trigger on working branch
+  # Later, trigger on pull request
+  push:
+    branches:
+      - github-actions-migration
+
+env:
+    source_path: 'libcore_source'
+    build_path: 'libcore_build'
+
+jobs:
+
+  prepare:
+      runs-on: [self-hosted, macos, x64]
+      steps:
+        -
+          name: Check runner environment
+          run: |
+            cmake --version
+            make --version
+            ctest --version
+            lcov --version
+            genhtml --version
+
+  ###########
+  # RELEASE #
+  ###########
+  release:
+    needs: prepare
+    runs-on: [self-hosted, macos, x64]
+    steps:
+      -
+        name: Checkout code
+        uses: actions/checkout@v2
+        with:
+          path: ${{env.source_path}}
+          clean: true
+          submodules: true
+      -
+        name: Build - Cmake
+        run: |
+          if [ -d "${{env.build_path}}" ]; 
+            then rm -Rf ${{env.build_path}}; 
+          fi
+          mkdir ${{env.build_path}}
+          cd ${{env.build_path}}
+          cmake \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DBUILD_TESTS=OFF \
+            ../${{env.source_path}}
+      - 
+        name: Build - Make
+        run: |
+          make -j$(sysctl -n hw.ncpu)
+        working-directory: ${{env.build_path}}
+      - 
+        name : Upload release build files
+        uses: actions/upload-artifact@v2
+        with:
+          name: macOS_release_build_files
+          path: |
+            ${{env.build_path}}/core/src/libledger-core-static.a
+            ${{env.build_path}}/core/src/libledger-core.dylib
+      - 
+        name: Clean workspace
+        if: ${{ always() }}
+        run: |
+          rm -rf "${{ github.workspace }}/${{env.build_path}}"
+          
+  #########
+  # DEBUG #
+  #########
+  debug:
+    needs: prepare
+    runs-on: [self-hosted, macos, x64]
+    steps:
+      -
+        name: Checkout code
+        uses: actions/checkout@v2
+        with:
+          path: ${{env.source_path}}
+          clean: true
+          submodules: true
+      -
+        name: Build - Cmake
+        run: |
+          if [ -d "${{env.build_path}}" ]; 
+            then rm -Rf ${{env.build_path}}; 
+          fi
+          mkdir ${{env.build_path}}
+          cd ${{env.build_path}}
+          cmake \
+            -DCMAKE_BUILD_TYPE=Debug \
+            -DBUILD_TESTS=ON \
+            -DCMAKE_INSTALL_PREFIX=/usr/local/opt/qt5/ \
+            ../${{env.source_path}}
+      - 
+        name: Build - Make
+        run: |
+          make -j$(sysctl -n hw.ncpu)
+        working-directory: ${{env.build_path}}
+      - 
+        name : Upload debug build files
+        uses: actions/upload-artifact@v2
+        with:
+          name: macOS_debug_build_files
+          path: |
+            ${{env.build_path}}/core/src/libledger-core-static.a
+            ${{env.build_path}}/core/src/libledger-core.dylib
+      - 
+        name: Run Unit Tests
+        run: |
+          ctest --timeout 240 -VV
+        continue-on-error: true
+        working-directory: ${{env.build_path}}
+      -
+        name: Generate raw coverage
+        run: |
+          lcov \
+            -q \
+            --directory core/src/ \
+            --base-directory ../${{env.source_path}}/core/src/ \
+            --no-external \
+            --capture \
+            -o lcov.info
+        working-directory: ${{env.build_path}}
+      - 
+        name: Generate coverage report
+        run: |
+          genhtml --ignore-errors \
+            source lcov.info \
+            --title "Libcore: Unit Test Coverage (macOS, Debug)" \
+            --frames \
+            --show-details \
+            --keep-descriptions \
+            --output-directory=lcov_html_report
+        working-directory: ${{env.build_path}}
+      - 
+        name: Upload coverage report
+        uses: actions/upload-artifact@v2
+        with:
+          name: macOS_coverage_report
+          path: |
+            ${{env.build_path}}/lcov_html_report
+      - 
+        name: Clean workspace
+        if: ${{ always() }}
+        run: |
+          rm -rf "${{ github.workspace }}/${{env.build_path}}"

@@ -34,6 +34,16 @@ else()
     target_link_libraries(ledger-core-integration-tests crypto)
 endif()
 
+if (SYS_OPENSSL)
+    find_package(OpenSSL)
+    if(WIN32)
+        target_link_libraries( ledger-core-integration-tests ws2_32 crypt32 )
+    endif()
+    target_link_libraries(ledger-core-integration-tests OpenSSL::Crypto)
+    else()
+        target_link_libraries(ledger-core-integration-tests crypto)
+    endif()
+
 target_link_libraries(ledger-core-integration-tests gtest gtest_main)
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
     # We need this otherwise link fails (for Linux),
