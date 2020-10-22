@@ -1,98 +1,170 @@
-  name: Linux
+name: Linux
 
-  on:
+on:
   # At the moment, only trigger on working branch
   # Later, trigger on pull request
-    push:
-      branches:
-        - github-actions-migration
+  push
 
-  env:
+env:
     source_path: 'libcore_source'
     build_path: 'libcore_build'
 
-  jobs:
+jobs:
 
-    debug:
-      runs-on: ubuntu-20.04
+  prepare:
+      runs-on: [self-hosted, linux, x64]
       steps:
-        - name: Install dependencies
+        -
+          name: Check runner environment
           run: |
-            sudo apt-get install -qqy \
-            build-essential \
-            git \
-            lcov \
-            gcovr \
-            qtbase5-dev \
-            libqt5websockets5-dev \
-            openssl \
-            libssl-dev \
-            cmake \
-            wget
+            cmake --version
+            make --version
+            ctest --version
+            lcov --version
+            genhtml --version
+            openssl version
 
-        - name: Checkout code
-          uses: actions/checkout@v2
-          with:
-            path: ${{env.source_path}}
-            clean: true
-            submodules: true
-
-        - name: Build - Cmake
-          run: |
+  ###########
+  # RELEASE #
+  ###########
+  release:
+    needs: prepare
+    runs-on: [self-hosted, linux, x64]
+    steps:
+      -
+        name: Checkout code
+        uses: actions/checkout@v2
+        with:
+          path: ${{env.source_path}}
+          clean: true
+          submodules: true
+      -
+        name: Build - Cmake
+        run: |
             if [ -d "${{env.build_path}}" ];
               then rm -Rf ${{env.build_path}};
             fi
             mkdir ${{env.build_path}}
             cd ${{env.build_path}}
-            cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_EXPORT_COMPILE_COMMANDS=YES -DBUILD_TESTS=ON ../${{env.source_path}}
-
-        - name: Build - Make
-          run: |
-            make -j$(nproc)
-          working-directory: ${{env.build_path}}
-
-        - name : Upload build files
-          uses: actions/upload-artifact@v2
-          with:
-            name: linux-build-files
-            path: |
-              ${{env.build_path}}/core/src/libledger-core-static.a
-              ${{env.build_path}}/core/src/libledger-core.so
-
-        - name: Run Unit Tests
-          run: ctest --timeout 240 -VV
-          continue-on-error: true
-          working-directory: ${{env.build_path}}
-
-        - name: Get raw coverage
-          run: |
-            lcov -q --directory core/src/ \
-            --base-directory ../${{env.source_path}}/core/src/ \
+            cmake \
+              -DCMAKE_BUILD_TYPE=Release \
+              -DBUILD_TESTS=OFF \
+              -DSYS_OPENSSL=ON \
+              -DOPENSSL_USE_STATIC_LIBS=TRUE \
+              ../${{env.source_path}}
+      - 
+        name: Build - Make
+        run: |
+          make -j$(nproc)
+        working-directory: ${{env.build_path}}
+      - 
+        name : Upload release build files
+        uses: actions/upload-artifact@v2
+        with:
+          name: Linux_release_build_files
+          path: |
+            ${{env.build_path}}/core/src/libledger-core-static.a
+            ${{env.build_path}}/core/src/libledger-core.so
+      - 
+        name: Clean workspace
+        if: ${{ always() }}
+        run: |
+          rm -rf "${{ github.workspace }}/${{env.build_path}}"
+          
+  #########
+  # DEBUG #
+  #########
+  debug:
+    needs: prepare
+    runs-on: [self-hosted, linux, x64]
+    steps:
+      -
+        name: Checkout code
+        uses: actions/checkout@v2
+        with:
+          path: ${{env.source_path}}
+          clean: true
+          submodules: true
+      -
+        name: Build - Cmake
+        run: |
+          if [ -d "${{env.build_path}}" ]; 
+            then rm -Rf ${{env.build_path}}; 
+          fi
+          mkdir ${{env.build_path}}
+          cd ${{env.build_path}}
+          cmake \
+            -DCMAKE_BUILD_TYPE=Debug \
+            -DBUILD_TESTS=ON \
+            -DSYS_OPENSSL=ON \
+            -DOPENSSL_USE_STATIC_LIBS=TRUE \
+            ../${{env.source_path}}
+      - 
+        name: Build - Make
+        run: |
+          make -j$(nproc)
+        working-directory: ${{env.build_path}}
+      - 
+        name : Upload debug build files
+        uses: actions/upload-artifact@v2
+        with:
+          name: Linux_debug_build_files
+          path: |
+            ${{env.build_path}}/core/src/libledger-core-static.a
+            ${{env.build_path}}/core/src/libledger-core.o
+      - 
+        name: Run Unit Tests
+        run: |
+          ctest --timeout 180 -VV
+        continue-on-error: true
+        working-directory: ${{env.build_path}}
+      -
+        name: Generate coverage
+        run: |
+          lcov \
+            --directory core/src \
+            --base-directory ../${{env.source_path}}/core/src \
             --no-external \
             --capture \
+            --rc lcov_branch_coverage=1 \
             -o lcov.info
-          working-directory: ${{env.build_path}}
-
-        - name: Generate coverage HTML report
-          run: |
-            genhtml --ignore-errors \
+        working-directory: ${{env.build_path}}
+      - 
+        name: Coverage summary
+        run: |
+          lcov \
+            --summary \
+            --rc lcov_branch_coverage=1 \
+            lcov.info
+        working-directory: ${{env.build_path}}
+      - 
+        name: Generate coverage report
+        run: |
+          genhtml --ignore-errors \
             source lcov.info \
             --title "Libcore: Unit Test Coverage (Linux, Debug)" \
             --frames \
             --show-details \
             --keep-descriptions \
-            --output-directory=lcov_html_report
-          working-directory: ${{env.build_path}}
-
-        - name : Upload coverage report
-          uses: actions/upload-artifact@v2
-          with:
-            name: linux_coverage_report
-            path: |
-               ${{env.build_path}}/lcov_html_report
-
-        - name: Clean workspace
-          if: ${{ always() }}
-          run: |
-            echo "Cleaning up previous run"
-            rm -rf "${{ github.workspace }}/${{env.build_path}}"
+            --demangle-cpp \
+            --function-coverage \
+            --branch-coverage \
+            --output-directory=Linux_coverage_report
+        working-directory: ${{env.build_path}}
+      - 
+        name: Compress coverage report
+        run: |
+          tar cvf - Linux_coverage_report | gzip -9 - > Linux_coverage_report.tar.gz
+        working-directory: ${{env.build_path}}
+      - 
+        name: Upload coverage report
+        uses: actions/upload-artifact@v2
+        with:
+          name: Linux_coverage_report
+          path: |
+            ${{env.build_path}}/Linux_coverage_report.tar.gz
+      - 
+        name: Clean workspace
+        if: ${{ always() }}
+        run: |
+          rm -rf "${{ github.workspace }}/${{env.build_path}}"
