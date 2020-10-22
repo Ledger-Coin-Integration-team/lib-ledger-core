@@ -163,7 +163,7 @@ jobs:
       - 
         name: Compress coverage report
         run: |
-          tar cvf - macOS_coverage_report | gzip -9 - > MacOS_coverage_report.tar.gz
+          tar -cvzf macOS_coverage_report.tar.gz macOS_coverage_report
         working-directory: ${{env.build_path}}
       - 
         name: Upload coverage report

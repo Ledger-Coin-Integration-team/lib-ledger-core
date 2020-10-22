@@ -156,7 +156,7 @@ jobs:
       - 
         name: Compress coverage report
         run: |
-          tar cvf - Linux_coverage_report | gzip -9 - > Linux_coverage_report.tar.gz
+          tar -cvzf Linux_coverage_report.tar.gz Linux_coverage_report
         working-directory: ${{env.build_path}}
       - 
         name: Upload coverage report
