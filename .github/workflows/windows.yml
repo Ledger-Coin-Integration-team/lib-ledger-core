@@ -23,6 +23,7 @@ jobs:
           msbuild /help
           cl
           ctest --version
+          opencppcoverage -h
 
   ###########
   # RELEASE #
