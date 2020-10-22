@@ -1,9 +1,11 @@
 name: macOS
 
 on:
-  # At the moment, only trigger on working branch
-  # Later, trigger on pull request
-  push
+# At the moment, only trigger on working branch
+# Later, trigger on pull request
+  push:
+    branches:
+      - github-actions-migration
 
 env:
     source_path: 'libcore_source'
