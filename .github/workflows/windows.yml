@@ -47,6 +47,7 @@
             cmake `
               -DBUILD_TESTS=OFF `
               -DSYS_OPENSSL=ON `
+              -DOPENSSL_USE_STATIC_LIBS=TRUE `
               ../${{env.source_path}}
         - 
           name: Build - Make
@@ -94,6 +95,7 @@
             cmake `
               -DBUILD_TESTS=ON `
               -DSYS_OPENSSL=ON `
+              -DOPENSSL_USE_STATIC_LIBS=TRUE `
               ../${{env.source_path}}
         - 
           name: Build - Make
