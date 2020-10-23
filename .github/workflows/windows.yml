@@ -123,7 +123,7 @@ jobs:
             --excluded_modules C:\Windows\*\* `
             --export_type html:Windows_coverage_report `
             -- `
-              ctest `
+              (get-command ctest).path `
               --interactive-debug-mode 0 `
               --timeout 180 `
               -C Debug `
