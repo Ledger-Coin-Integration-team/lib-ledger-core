@@ -69,7 +69,7 @@ jobs:
         if: ${{ always() }}
         run: |
           echo "Cleaning up previous run"
-          Remove-Item -LiteralPath "${{ github.workspace }}/${{env.build_path}}" -Force -Recurse
+          Remove-Item -LiteralPath "${{ github.workspace }}\${{env.build_path}}" -Force -Recurse
         continue-on-error: true
 
   #########
@@ -119,7 +119,7 @@ jobs:
         run: |
            OpenCppCoverage.exe `
             --cover_children `
-            --sources ${{ github.workspace }}/${{env.source_path}}\core\src\* `
+            --sources ${{ github.workspace }}\${{env.source_path}}\core\src\* `
             --excluded_modules  C:\Windows\*\* `
             --export_type html:Windows_coverage_report `
             -- ctest --interactive-debug-mode 0 --timeout 180 -C Debug -VV
