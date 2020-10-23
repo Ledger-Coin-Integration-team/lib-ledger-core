@@ -48,7 +48,7 @@ jobs:
             -DBUILD_TESTS=OFF `
             -DSYS_OPENSSL=ON `
             -DOPENSSL_USE_STATIC_LIBS=TRUE `
-            ../${{env.source_path}}
+            ..\${{env.source_path}}
       - 
         name: Build - Make
         run: |
@@ -63,7 +63,7 @@ jobs:
         with:
           name: windows-release-build-files
           path: |
-            ${{env.build_path}}/core/src/build/Release/ledger-core.dll
+            ${{env.build_path}}\core\src\build\Release\ledger-core.dll
       - 
         name: Clean workspace
         if: ${{ always() }}
@@ -96,7 +96,7 @@ jobs:
             -DBUILD_TESTS=ON `
             -DSYS_OPENSSL=ON `
             -DOPENSSL_USE_STATIC_LIBS=TRUE `
-            ../${{env.source_path}}
+            ..\${{env.source_path}}
       - 
         name: Build - Make
         run: |
@@ -112,8 +112,8 @@ jobs:
         with:
           name: windows-debug-build-files
           path: |
-            ${{env.build_path}}/core/src/build/Debug/ledger-core.dll
-            ${{env.build_path}}/core/src/build/Debug/ledger-core.pdb
+            ${{env.build_path}}\core\src\build\Debug\ledger-core.dll
+            ${{env.build_path}}\core\src\build\Debug\ledger-core.pdb
       - 
         name: Run Unit Tests
         run: |
@@ -136,11 +136,11 @@ jobs:
         with:
           name: Windows_coverage_report
           path: |
-              ${{env.build_path}}/Windows_coverage_report.tar.gz
+              ${{env.build_path}}\Windows_coverage_report.tar.gz
       -  
         name: Clean workspace
         if: ${{ always() }}
         run: |
           echo "Cleaning up previous run"
-          Remove-Item -LiteralPath "${{ github.workspace }}/${{env.build_path}}" -Force -Recurse
+          Remove-Item -LiteralPath "${{ github.workspace }}\${{env.build_path}}" -Force -Recurse
         continue-on-error: true
