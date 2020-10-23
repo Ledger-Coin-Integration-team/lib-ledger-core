@@ -120,9 +120,14 @@ jobs:
            OpenCppCoverage.exe `
             --cover_children `
             --sources ${{ github.workspace }}\${{env.source_path}}\core\src\* `
-            --excluded_modules  C:\Windows\*\* `
+            --excluded_modules C:\Windows\*\* `
             --export_type html:Windows_coverage_report `
-            -- ctest --interactive-debug-mode 0 --timeout 180 -C Debug -VV
+            -- `
+              ctest `
+              --interactive-debug-mode 0 `
+              --timeout 180 `
+              -C Debug `
+              -VV
         continue-on-error: true
         working-directory: ${{env.build_path}}
       - 
