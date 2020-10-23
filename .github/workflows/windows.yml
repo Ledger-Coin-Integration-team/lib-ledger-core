@@ -103,7 +103,8 @@ jobs:
           cmake `
             --build . `
             --config Debug `
-            -- /m 
+            -- `
+              /m 
         working-directory: ${{env.build_path}}
       - 
         name : Upload build files
