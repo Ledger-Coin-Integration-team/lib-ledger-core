@@ -114,6 +114,22 @@ jobs:
           path: |
             ${{env.build_path}}\core\src\build\Debug\ledger-core.dll
             ${{env.build_path}}\core\src\build\Debug\ledger-core.pdb
+      #- 
+      #  name: Run Unit Tests with coverage
+      #  run: |
+      #     OpenCppCoverage.exe `
+      #      --cover_children `
+      #      --sources ${{ github.workspace }}\${{env.source_path}}\core\src\* `
+      #      --excluded_modules *:\Windows\Sys*\* `
+      #      --export_type html:Windows_coverage_report `
+      #      -- `
+      #        (get-command ctest).path `
+      #        --interactive-debug-mode 0 `
+      #       --timeout 180 `
+      #        -C Debug `
+      #        -VV
+      #  continue-on-error: true
+      #  working-directory: ${{env.build_path}}
       - 
         name: Run Unit Tests
         run: |
@@ -130,18 +146,18 @@ jobs:
               -VV
         continue-on-error: true
         working-directory: ${{env.build_path}}
-      - 
-        name: Compress coverage report
-        run: |
-          tar -cvzf Windows_coverage_report.tar.gz Windows_coverage_report
-        working-directory: ${{env.build_path}}
-      - 
-        name: Upload coverage report
-        uses: actions/upload-artifact@v2
-        with:
-          name: Windows_coverage_report
-          path: |
-              ${{env.build_path}}\Windows_coverage_report.tar.gz
+      #- 
+      #  name: Compress coverage report
+      #  run: |
+      #    tar -cvzf Windows_coverage_report.tar.gz Windows_coverage_report
+      #  working-directory: ${{env.build_path}}
+      #- 
+      #  name: Upload coverage report
+      # uses: actions/upload-artifact@v2
+      # with:
+      #    name: Windows_coverage_report
+      #    path: |
+      #        ${{env.build_path}}\Windows_coverage_report.tar.gz
       -  
         name: Clean workspace
         if: ${{ always() }}
