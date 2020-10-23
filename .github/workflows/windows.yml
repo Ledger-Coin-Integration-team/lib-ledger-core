@@ -120,7 +120,7 @@ jobs:
            OpenCppCoverage.exe `
             --cover_children `
             --sources ${{ github.workspace }}\${{env.source_path}}\core\src\* `
-            --excluded_modules C:\Windows\*\* `
+            --excluded_modules *:\Windows\Sys*\* `
             --export_type html:Windows_coverage_report `
             -- `
               (get-command ctest).path `
