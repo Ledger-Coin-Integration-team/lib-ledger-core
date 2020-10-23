@@ -133,13 +133,7 @@ jobs:
       - 
         name: Run Unit Tests
         run: |
-           OpenCppCoverage.exe `
-            --cover_children `
-            --sources ${{ github.workspace }}\${{env.source_path}}\core\src\* `
-            --excluded_modules *:\Windows\Sys*\* `
-            --export_type html:Windows_coverage_report `
-            -- `
-              (get-command ctest).path `
+            (get-command ctest).path `
               --interactive-debug-mode 0 `
               --timeout 180 `
               -C Debug `
