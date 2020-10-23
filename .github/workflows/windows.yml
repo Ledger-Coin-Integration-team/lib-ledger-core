@@ -55,7 +55,7 @@ jobs:
           cmake `
             --build . `
             --config Release `
-            -- /m
+            -- /m:1
         working-directory: ${{env.build_path}}
       - 
         name : Upload build files
@@ -104,7 +104,7 @@ jobs:
             --build . `
             --config Debug `
             -- `
-              /m 
+              /m:1
         working-directory: ${{env.build_path}}
       - 
         name : Upload build files
