@@ -114,6 +114,16 @@ jobs:
           path: |
             ${{env.build_path}}\core\src\build\Debug\ledger-core.dll
             ${{env.build_path}}\core\src\build\Debug\ledger-core.pdb
+      - 
+        name: Run Unit Tests
+        run: |
+            ctest `
+              --interactive-debug-mode 0 `
+              --timeout 180 `
+              -C Debug `
+              -VV
+        continue-on-error: true
+        working-directory: ${{env.build_path}}
       #- 
       #  name: Run Unit Tests with coverage
       #  run: |
@@ -130,16 +140,6 @@ jobs:
       #        -VV
       #  continue-on-error: true
       #  working-directory: ${{env.build_path}}
-      - 
-        name: Run Unit Tests
-        run: |
-            (get-command ctest).path `
-              --interactive-debug-mode 0 `
-              --timeout 180 `
-              -C Debug `
-              -VV
-        continue-on-error: true
-        working-directory: ${{env.build_path}}
       #- 
       #  name: Compress coverage report
       #  run: |
