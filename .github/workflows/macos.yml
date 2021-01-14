@@ -11,6 +11,7 @@ env:
     source_path: 'libcore_source'
     build_path: 'libcore_build'
     open_ssl_path: '/usr/local/opt/openssl@1.1/'
+    build_jar_path: 'jar_build'
 
 jobs:
 
@@ -30,6 +31,8 @@ jobs:
             then 
               exit 1
             fi
+            sbt --version
+            java -version
 
   ###########
   # RELEASE #
@@ -59,12 +62,23 @@ jobs:
             -DSYS_OPENSSL=ON \
             -DOPENSSL_USE_STATIC_LIBS=TRUE \
             -DOPENSSL_ROOT_DIR=${{env.open_ssl_path}} \
+            -DTARGET_JNI=ON \
             ../${{env.source_path}}
       - 
         name: Build - Make
         run: |
           make -j$(sysctl -n hw.ncpu)
         working-directory: ${{env.build_path}}
+      - 
+        name: Build - Jar
+        run: |
+          cp -v ${{env.source_path}}/api/core/java/* .
+          cp -v ${{env.source_path}}/api/core/scala/* .
+          mkdir -p src/main/resources/resources/djinni_native_libs
+          cp  ${{env.build_path}}/core/src/libledger-core.so src/main/resources/resources/djinni_native_libs/libledger-core_jni.so
+          sbt package
+          find . -name \*.jar -exec mv {} ${{env.build_path}}/core/src/ledger-lib-core.jar
+        working-directory: ${{env.build_jar_path}}
       - 
         name : Upload release build files
         uses: actions/upload-artifact@v2
@@ -73,11 +87,13 @@ jobs:
           path: |
             ${{env.build_path}}/core/src/libledger-core-static.a
             ${{env.build_path}}/core/src/libledger-core.dylib
+            ${{env.build_path}}/core/src/ledger-lib-core.jar
       - 
         name: Clean workspace
         if: ${{ always() }}
         run: |
           rm -rf "${{ github.workspace }}/${{env.build_path}}"
+          rm -rf "${{ github.workspace }}/${{env.build_jar_path}}"
           
   #########
   # DEBUG #
