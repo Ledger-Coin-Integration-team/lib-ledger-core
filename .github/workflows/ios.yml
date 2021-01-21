@@ -1,0 +1,111 @@
+name: iOS
+
+on:
+# At the moment, only trigger on working branch
+# Later, trigger on pull request
+  push:
+    branches:
+      - github-actions-migration
+
+env:
+    source_path: 'libcore_source'
+    build_path: 'libcore_build'
+    open_ssl_path: '/usr/local/opt/openssl@1.1/'
+    polly_root: '${{env.source_path}}/toolchains/polly'
+
+jobs:
+
+  prepare:
+      runs-on: [self-hosted, macos, x64]
+      steps:
+        -
+          name: Check runner environment
+          run: |
+            cmake --version
+            make --version
+            ctest --version
+            lcov --version
+            genhtml --version
+            openssl version
+            if [ ! -d "${{env.open_ssl_path}}" ]
+            then 
+              exit 1
+            fi
+            sbt --version
+            java -version
+            xcodebuild -version
+
+  ###########
+  # RELEASE #
+  ###########
+  release:
+    needs: prepare
+    runs-on: [self-hosted, macos, x64]
+    strategy:
+      matrix: 
+       include:
+         - toolchain: '-armv7'
+           sysroot: 'iphoneos'
+           arch: 'armv7'
+         - toolchain: '-arm64'
+           sysroot: 'iphoneos'
+           arch: 'arm64'
+         - toolchain: ''
+           sysroot: 'iphonesimulator'
+           arch: 'x86_64'
+    steps:
+      -
+        name: Checkout code
+        uses: actions/checkout@v2
+        with:
+          path: ${{env.source_path}}
+          clean: true
+          submodules: true
+      -
+        name: Build - Cmake
+        run: |
+          if [ -d "${{env.build_path}}" ]; 
+            then rm -Rf ${{env.build_path}}; 
+          fi
+          mkdir ${{env.build_path}}
+          cd ${{env.build_path}}
+
+          export POLLY_IOS_BUNDLE_IDENTIFIER='com.ledger.core'
+          export XCODE_XCCONFIG_FILE=${{env.polly_root}}/scripts/NoCodeSign.xcconfig
+          export TOOLCHAIN_NAME='ios-nocodesign-11-2-dep-9-3${{matrix.toolchain}}'
+          export OSX_SYSROOT=${{matrix.sysroot}}
+          export ARCH=${{matrix.arch}}
+
+          if [ ${{matrix.sysroot}} == 'iphonesimulator']; then
+            cp ${{env.source_path}}/tools/build_ios/iphone.cmake ${{env.source_path}}/${{env.polly_root}/os/
+          fi
+          cp ${{env.source_path}}/tools/build_ios/framework.plist.in .
+          cp ${{env.source_path}}/tools/build_ios/install_name.sh .
+  
+          sed -i '' '/CODE_SIGN_ENTITLEMENTS/d' ${{env.source_path}}/${{env.polly_root}/scripts/NoCodeSign.xcconfig
+          
+          cmake \
+            -DCMAKE_BUILD_TYPE:STRING=Release \
+            -DBUILD_TESTS=OFF \
+            -DCMAKE_OSX_ARCHITECTURES:STRING=${{matrix.arch}} \
+            -DCMAKE_MACOSX_BUNDLE:BOOL=ON \
+            -DCMAKE_OSX_SYSROOT:STRING=${{matrix.sysroot}} \
+            -DCMAKE_TOOLCHAIN_FILE=${{env.polly_root}/ios-nocodesign-11-2-dep-9-3${{matrix.toolchain}}.cmake
+            ../${{env.source_path}}
+      - 
+        name: Build - Xcode
+        run: |
+          xcodebuild -project ledger-core.xcodeproj -configuration Release -jobs $(sysctl -n hw.ncpu)
+        working-directory: ${{env.build_path}}
+      - 
+        name : Upload release build files
+        uses: actions/upload-artifact@v2
+        with:
+          name: iOS_release_build_files
+          path: |
+            ${{env.build_path}}/core/src/Release-${{matrix.sysroot}}/libledger-core.dylib
+      - 
+        name: Clean workspace
+        if: ${{ always() }}
+        run: |
+          rm -rf "${{ github.workspace }}/${{env.build_path}}"
