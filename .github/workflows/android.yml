@@ -46,7 +46,7 @@ jobs:
     runs-on: [self-hosted, linux, x64]
     strategy:
       matrix: 
-        run: ['x86_64', 'armeabi-v7a', 'arm64-v8a']
+        arch: ['x86_64', 'armeabi-v7a', 'arm64-v8a']
     steps:
       -
         name: Checkout code
@@ -67,7 +67,7 @@ jobs:
             cmake \
               -DCMAKE_BUILD_TYPE:STRING=Release \
               -DBUILD_TESTS=OFF \
-              -DCMAKE_TOOLCHAIN_FILE=${{env.polly_root}}/android-ndk-${{env.android_ndk_version}}-api-${{env.android_ndk_api_version}}-${{matrix.run}}-clang-libcxx \ 
+              -DCMAKE_TOOLCHAIN_FILE=${{env.polly_root}}/android-ndk-${{env.android_ndk_version}}-api-${{env.android_ndk_api_version}}-${{matrix.arch}}-clang-libcxx \ 
               -DTARGET_JNI=ON \
               ../${{env.source_path}}
       - 
@@ -79,7 +79,7 @@ jobs:
         name : Upload release build files
         uses: actions/upload-artifact@v2
         with:
-          name: Android_release_build_files
+          name: Android_${{matrix.run}}_release_build_files
           path: |
             ${{env.build_path}}/core/src/libledger-core-static.a
             ${{env.build_path}}/core/src/libledger-core.so
