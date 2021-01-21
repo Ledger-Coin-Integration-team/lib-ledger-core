@@ -1,0 +1,90 @@
+name: Android
+
+on:
+# At the moment, only trigger on working branch
+# Later, trigger on pull request
+  push:
+    branches:
+      - github-actions-migration
+
+env:
+    source_path: 'libcore_source'
+    build_path: 'libcore_build'
+    polly_root: '${{env.source_path}}/toolchains/polly'
+    android_ndk: 'android_ndk'
+    android_ndk_version: 'r18b'
+    android_ndk_api_version: '21'
+
+jobs:
+
+  prepare:
+      runs-on: [self-hosted, linux, x64]
+      steps:
+        -
+          name: Check runner environment
+          run: |
+            cmake --version
+            make --version
+            ctest --version
+            lcov --version
+            genhtml --version
+            openssl version
+            sbt --version
+            java -version
+            if [ ! -d "${{env.android_ndk}}" ]; then 
+              wget --quiet https://dl.google.com/android/repository/android-ndk-${{env.android_ndk_version}}-linux-x86_64.zip
+              unzip -q android-ndk-${{env.android_ndk_version}}-linux-x86_64.zip -d ${{ github.workspace }}/${{env.android_ndk}}
+              rm -rf android-ndk-${{env.android_ndk_version}}-linux-x86_64.zip
+            fi
+
+
+  ###########
+  # RELEASE #
+  ###########
+  release:
+    needs: prepare
+    runs-on: [self-hosted, linux, x64]
+    strategy:
+      matrix: 
+        run: ['x86_64', 'armeabi-v7a', 'arm64-v8a']
+    steps:
+      -
+        name: Checkout code
+        uses: actions/checkout@v2
+        with:
+          path: ${{env.source_path}}
+          clean: true
+          submodules: true
+      -
+        name: Configure - Cmake
+        run: |
+            if [ -d "${{env.build_path}}" ];
+              then rm -Rf ${{env.build_path}};
+            fi
+            mkdir ${{env.build_path}}
+            cd ${{env.build_path}}
+            export ANDROID_NDK_${{env.android_ndk_version}}='${{ github.workspace }}/${{env.android_ndk}}'
+            cmake \
+              -DCMAKE_BUILD_TYPE:STRING=Release \
+              -DBUILD_TESTS=OFF \
+              -DCMAKE_TOOLCHAIN_FILE=${{env.polly_root}}/android-ndk-${{env.android_ndk_version}}-api-${{env.android_ndk_api_version}}-${{matrix.run}}-clang-libcxx 
+              -DTARGET_JNI=ON \
+              ../${{env.source_path}}
+      - 
+        name: Build - Cmake
+        run: |
+          cmake --build . --config Release -- -j$(nproc)
+        working-directory: ${{env.build_path}}
+      - 
+        name : Upload release build files
+        uses: actions/upload-artifact@v2
+        with:
+          name: Android_release_build_files
+          path: |
+            ${{env.build_path}}/core/src/libledger-core-static.a
+            ${{env.build_path}}/core/src/libledger-core.so
+      - 
+        name: Clean workspace
+        if: ${{ always() }}
+        run: |
+          rm -rf "${{ github.workspace }}/${{env.build_path}}"
