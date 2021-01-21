@@ -92,8 +92,8 @@ jobs:
         name: Clean workspace
         if: ${{ always() }}
         run: |
-          rm -rf "${{ github.workspace }}/${{env.build_path}}"
-          rm -rf "${{ github.workspace }}/${{env.build_jar_path}}"
+          rm -rf "${{github.workspace}}/${{env.build_path}}"
+          rm -rf "${{github.workspace}}/${{env.build_jar_path}}"
           
   #########
   # DEBUG #
@@ -192,6 +192,4 @@ jobs:
         name: Clean workspace
         if: ${{ always() }}
         run: |
-          ls ${{env.build_path}}/CMakeFiles/
-          cat ${{env.build_path}}/CMakeFiles/CMakeError.log
-          rm -rf "${{ github.workspace }}/${{env.build_path}}"
+          rm -rf "${{github.workspace}}/${{env.build_path}}"

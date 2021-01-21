@@ -10,10 +10,10 @@ on:
 env:
     source_path: 'libcore_source'
     build_path: 'libcore_build'
-    polly_root: '${{ github.workspace }}/${{env.source_path}}/toolchains/polly'
-    android_ndk: 'android_ndk'
+    polly_root: '${{github.workspace}}/${{env.source_path}}/toolchains/polly'
     android_ndk_version: 'r18b'
     android_ndk_api_version: '21'
+    android_ndk: 'android_ndk_${{env.android_ndk_version}}'
 
 jobs:
 
@@ -63,7 +63,7 @@ jobs:
             fi
             mkdir ${{env.build_path}}
             cd ${{env.build_path}}
-            export ANDROID_NDK_${{env.android_ndk_version}}='${{ github.workspace }}/${{env.android_ndk}}'
+            export ANDROID_NDK_${{env.android_ndk_version}}='${{github.workspace}}/${{env.android_ndk}}'
             cmake \
               -DCMAKE_BUILD_TYPE:STRING=Release \
               -DBUILD_TESTS=OFF \
@@ -87,4 +87,4 @@ jobs:
         name: Clean workspace
         if: ${{ always() }}
         run: |
-          rm -rf "${{ github.workspace }}/${{env.build_path}}"
+          rm -rf "${{github.workspace}}/${{env.build_path}}"

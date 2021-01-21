@@ -69,7 +69,7 @@ jobs:
         if: ${{ always() }}
         run: |
           echo "Cleaning up previous run"
-          Remove-Item -LiteralPath "${{ github.workspace }}\${{env.build_path}}" -Force -Recurse
+          Remove-Item -LiteralPath "${{github.workspace}}\${{env.build_path}}" -Force -Recurse
         continue-on-error: true
 
   #########
@@ -157,5 +157,5 @@ jobs:
         if: ${{ always() }}
         run: |
           echo "Cleaning up previous run"
-          Remove-Item -LiteralPath "${{ github.workspace }}\${{env.build_path}}" -Force -Recurse
+          Remove-Item -LiteralPath "${{github.workspace}}\${{env.build_path}}" -Force -Recurse
         continue-on-error: true

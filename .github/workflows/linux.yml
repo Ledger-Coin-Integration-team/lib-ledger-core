@@ -86,8 +86,8 @@ jobs:
         name: Clean workspace
         if: ${{ always() }}
         run: |
-          rm -rf "${{ github.workspace }}/${{env.build_path}}"
-          rm -rf "${{ github.workspace }}/${{env.build_jar_path}}"
+          rm -rf "${{github.workspace}}/${{env.build_path}}"
+          rm -rf "${{github.workspace}}/${{env.build_jar_path}}"
           
   #########
   # DEBUG #
@@ -185,4 +185,4 @@ jobs:
         name: Clean workspace
         if: ${{ always() }}
         run: |
-          rm -rf "${{ github.workspace }}/${{env.build_path}}"
+          rm -rf "${{github.workspace}}/${{env.build_path}}"
