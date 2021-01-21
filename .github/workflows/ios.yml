@@ -86,7 +86,7 @@ jobs:
             -DCMAKE_OSX_ARCHITECTURES:STRING=${{matrix.arch}} \
             -DCMAKE_MACOSX_BUNDLE:BOOL=ON \
             -DCMAKE_OSX_SYSROOT:STRING=${{matrix.sysroot}} \
-            -DCMAKE_TOOLCHAIN_FILE=${{env.polly_root}/ios-nocodesign-${{env.ios_version}}${{env.deployment_version}}${{matrix.toolchain}}.cmake
+            -DCMAKE_TOOLCHAIN_FILE=${{env.polly_root}/ios-nocodesign-${{env.ios_version}}${{env.deployment_version}}${{matrix.toolchain}}.cmake \
             ../${{env.source_path}}
       - 
         name: Build - Xcode
