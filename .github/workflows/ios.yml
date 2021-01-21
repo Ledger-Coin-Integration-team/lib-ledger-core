@@ -11,7 +11,9 @@ env:
     source_path: 'libcore_source'
     build_path: 'libcore_build'
     open_ssl_path: '/usr/local/opt/openssl@1.1/'
-    polly_root: '${{env.source_path}}/toolchains/polly'
+    polly_root: '${{ github.workspace }}/${{env.source_path}}/toolchains/polly'
+    ios_version: '11-2'
+    deployment_version: '9-3'
 
 jobs:
 
@@ -72,25 +74,25 @@ jobs:
 
           export POLLY_IOS_BUNDLE_IDENTIFIER='com.ledger.core'
           export XCODE_XCCONFIG_FILE=${{env.polly_root}}/scripts/NoCodeSign.xcconfig
-          export TOOLCHAIN_NAME='ios-nocodesign-11-2-dep-9-3${{matrix.toolchain}}'
+          export TOOLCHAIN_NAME='ios-nocodesign-${{env.ios_version}}-dep-${{env.deployment_version}}${{matrix.toolchain}}'
           export OSX_SYSROOT=${{matrix.sysroot}}
           export ARCH=${{matrix.arch}}
 
           if [ ${{matrix.sysroot}} == 'iphonesimulator']; then
-            cp ${{env.source_path}}/tools/build_ios/iphone.cmake ${{env.source_path}}/${{env.polly_root}/os/
+            cp ${{env.source_path}}/tools/build_ios/iphone.cmake ${{env.polly_root}/os/
           fi
           cp ${{env.source_path}}/tools/build_ios/framework.plist.in .
           cp ${{env.source_path}}/tools/build_ios/install_name.sh .
   
-          sed -i '' '/CODE_SIGN_ENTITLEMENTS/d' ${{env.source_path}}/${{env.polly_root}/scripts/NoCodeSign.xcconfig
+          sed -i '' '/CODE_SIGN_ENTITLEMENTS/d' ${{env.polly_root}/scripts/NoCodeSign.xcconfig
           
-          cmake \
+          cmake -G "Xcode" \
             -DCMAKE_BUILD_TYPE:STRING=Release \
             -DBUILD_TESTS=OFF \
             -DCMAKE_OSX_ARCHITECTURES:STRING=${{matrix.arch}} \
             -DCMAKE_MACOSX_BUNDLE:BOOL=ON \
             -DCMAKE_OSX_SYSROOT:STRING=${{matrix.sysroot}} \
-            -DCMAKE_TOOLCHAIN_FILE=${{env.polly_root}/ios-nocodesign-11-2-dep-9-3${{matrix.toolchain}}.cmake
+            -DCMAKE_TOOLCHAIN_FILE=${{env.polly_root}/ios-nocodesign-${{env.ios_version}}-dep-${{env.deployment_version}}${{matrix.toolchain}}.cmake
             ../${{env.source_path}}
       - 
         name: Build - Xcode
