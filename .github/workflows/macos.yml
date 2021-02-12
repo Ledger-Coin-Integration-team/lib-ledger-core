@@ -56,7 +56,7 @@ jobs:
           fi
           mkdir ${{env.build_path}}
           cd ${{env.build_path}}
-          cmake \
+          arch -arm64 cmake \
             -DCMAKE_BUILD_TYPE=Release \
             -DBUILD_TESTS=OFF \
             -DSYS_OPENSSL=ON \
@@ -67,7 +67,7 @@ jobs:
       - 
         name: Build - Make
         run: |
-          make -j$(sysctl -n hw.ncpu)
+          arch -arm64 make -j$(sysctl -n hw.ncpu)
         working-directory: ${{env.build_path}}
       - 
         name: Build - Jar
@@ -117,7 +117,7 @@ jobs:
           fi
           mkdir ${{env.build_path}}
           cd ${{env.build_path}}
-          cmake \
+          arch -arm64 cmake \
             -DCMAKE_BUILD_TYPE=Debug \
             -DBUILD_TESTS=ON \
             -DSYS_OPENSSL=ON \
@@ -127,7 +127,7 @@ jobs:
       - 
         name: Build - Make
         run: |
-          make -j$(sysctl -n hw.ncpu)
+          arch -arm64 make -j$(sysctl -n hw.ncpu)
         working-directory: ${{env.build_path}}
       - 
         name : Upload debug build files
@@ -146,7 +146,7 @@ jobs:
       -
         name: Generate coverage
         run: |
-          lcov \
+          arch -arm64 lcov \
             --directory core/src \
             --base-directory ../${{env.source_path}}/core/src \
             --no-external \
@@ -165,7 +165,7 @@ jobs:
       - 
         name: Generate coverage report
         run: |
-          genhtml --ignore-errors \
+          arch -arm64 genhtml --ignore-errors \
             source lcov.info \
             --title "Libcore: Unit Test Coverage (macOS, Debug)" \
             --frames \

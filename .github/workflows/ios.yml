@@ -10,7 +10,7 @@ on:
 env:
     source_path: 'libcore_source'
     build_path: 'libcore_build'
-    open_ssl_path: '/opt/homebrew/opt/openssl/bin/openssl/'
+    open_ssl_path: '/opt/homebrew/opt/openssl@1.1'
     polly_root: '${{github.workspace}}/${{source_path}}/toolchains/polly'
     ios_version: '11-2'
     deployment_version: '-dep-9-3'
@@ -80,7 +80,7 @@ jobs:
           cp ../${{env.source_path}}/tools/build_ios/framework.plist.in .
           cp ../${{env.source_path}}/tools/build_ios/install_name.sh .
             
-          cmake -G "Xcode" \
+          arch -arm64 cmake -G "Xcode" \
             -DCMAKE_BUILD_TYPE:STRING=Release \
             -DBUILD_TESTS=OFF \
             -DCMAKE_OSX_ARCHITECTURES:STRING=${{matrix.arch}} \
@@ -91,7 +91,7 @@ jobs:
       - 
         name: Build - Xcode
         run: |
-          xcodebuild -project ledger-core.xcodeproj -configuration Release -jobs $(sysctl -n hw.ncpu)
+          arch -arm64 xcodebuild -project ledger-core.xcodeproj -configuration Release -jobs $(sysctl -n hw.ncpu)
         working-directory: ${{env.build_path}}
       - 
         name : Upload release build files
