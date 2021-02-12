@@ -11,9 +11,6 @@ env:
     source_path: 'libcore_source'
     build_path: 'libcore_build'
     open_ssl_path: '/opt/homebrew/opt/openssl@1.1'
-    polly_root: '${{github.workspace}}/${{source_path}}/toolchains/polly'
-    ios_version: '11-2'
-    deployment_version: '-dep-9-3'
 
 jobs:
 
@@ -88,6 +85,11 @@ jobs:
             -DCMAKE_OSX_SYSROOT:STRING=${{matrix.sysroot}} \
             -DCMAKE_TOOLCHAIN_FILE=${{env.polly_root}/ios-nocodesign-${{env.ios_version}}${{env.deployment_version}}${{matrix.toolchain}}.cmake \
             ../${{env.source_path}}
+
+        env:
+          polly_root: '${{github.workspace}}/${{env.source_path}}/toolchains/polly'
+          ios_version: '11-2'
+          deployment_version: '-dep-9-3'
       - 
         name: Build - Xcode
         run: |
