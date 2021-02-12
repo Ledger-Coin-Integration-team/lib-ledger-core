@@ -62,6 +62,10 @@ jobs:
           submodules: true
       -
         name: Build - Cmake
+        env:
+          polly_root: '${{github.workspace}}/${{env.source_path}}/toolchains/polly'
+          ios_version: '11-2'
+          deployment_version: '-dep-9-3'
         run: |
           if [ -d "${{env.build_path}}" ]; 
             then rm -Rf ${{env.build_path}}; 
@@ -86,10 +90,6 @@ jobs:
             -DCMAKE_TOOLCHAIN_FILE=${{env.polly_root}/ios-nocodesign-${{env.ios_version}}${{env.deployment_version}}${{matrix.toolchain}}.cmake \
             ../${{env.source_path}}
 
-        env:
-          polly_root: '${{github.workspace}}/${{env.source_path}}/toolchains/polly'
-          ios_version: '11-2'
-          deployment_version: '-dep-9-3'
       - 
         name: Build - Xcode
         run: |
