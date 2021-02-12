@@ -66,7 +66,6 @@ jobs:
           polly_root: '${{github.workspace}}/${{env.source_path}}/toolchains/polly'
           ios_version: '11-2'
           deployment_version: '-dep-9-3'
-          java_home: '/Library/Java/JavaVirtualMachines/adoptopenjdk-8.jdk/Contents/Home'
         run: |
           if [ -d "${{env.build_path}}" ]; 
             then rm -Rf ${{env.build_path}}; 
@@ -74,7 +73,6 @@ jobs:
           mkdir ${{env.build_path}}
           cd ${{env.build_path}}
 
-          export JAVA_HOME=${{env.java_home}}
           export POLLY_IOS_BUNDLE_IDENTIFIER='com.ledger.core'
           export XCODE_XCCONFIG_FILE=${{env.polly_root}}/scripts/NoCodeSign.xcconfig
           if [ ${{matrix.sysroot}} == 'iphonesimulator']; then

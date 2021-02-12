@@ -50,12 +50,15 @@ jobs:
           submodules: true
       -
         name: Build - Cmake
+        env:
+          java_home: '/Library/Java/JavaVirtualMachines/zulu-8.jdk/Contents/Home'
         run: |
           if [ -d "${{env.build_path}}" ]; 
             then rm -Rf ${{env.build_path}}; 
           fi
           mkdir ${{env.build_path}}
           cd ${{env.build_path}}
+          export JAVA_HOME=${{env.java_home}}
           arch -arm64 cmake \
             -DCMAKE_BUILD_TYPE=Release \
             -DBUILD_TESTS=OFF \
@@ -171,7 +174,7 @@ jobs:
             --frames \
             --show-details \
             --keep-descriptions \
-            --demangle-cpp \
+#            --demangle-cpp \ <---- doesn't seems to work now : c++filt: Did you mean '--no-strip-underscore'?
             --function-coverage \
             --branch-coverage \
             --output-directory=macOS_coverage_report
