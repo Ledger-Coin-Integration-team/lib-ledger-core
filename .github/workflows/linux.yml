@@ -15,7 +15,7 @@ env:
 jobs:
 
   prepare:
-      runs-on: [self-hosted, linux, x64]
+      runs-on: [self-hosted, linux, x64, medium-performance]
       steps:
         -
           name: Check runner environment
@@ -94,7 +94,7 @@ jobs:
   #########
   debug:
     needs: prepare
-    runs-on: [self-hosted, linux, x64]
+    runs-on: [self-hosted, linux, x64, high-performance]
     steps:
       -
         name: Checkout code
