@@ -174,7 +174,6 @@ jobs:
             --frames \
             --show-details \
             --keep-descriptions \
-#            --demangle-cpp \ <---- doesn't seems to work now : c++filt: Did you mean '--no-strip-underscore'?
             --function-coverage \
             --branch-coverage \
             --output-directory=macOS_coverage_report
