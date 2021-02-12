@@ -56,6 +56,7 @@ jobs:
           if [ -d "${{env.build_path}}" ]; 
             then rm -Rf ${{env.build_path}}; 
           fi
+          mkdir ${{env.build_jar_path}}
           mkdir ${{env.build_path}}
           cd ${{env.build_path}}
           export JAVA_HOME=${{env.java_home}}
@@ -80,7 +81,7 @@ jobs:
           mkdir -p src/main/resources/resources/djinni_native_libs
           cp  ${{env.build_path}}/core/src/libledger-core.dylib src/main/resources/resources/djinni_native_libs/libledger-core_jni.dylib
           arch -arm64 sbt package
-          find . -name \*.jar -exec mv {} ${{env.build_path}}/core/src/ledger-lib-core.jar
+          find . -name \*.jar -exec mv {} ../libcore_build/core/src/ledger-lib-core.jar \;
         working-directory: ${{env.build_jar_path}}
       - 
         name : Upload release build files
