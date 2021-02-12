@@ -10,10 +10,8 @@ on:
 env:
     source_path: 'libcore_source'
     build_path: 'libcore_build'
-    polly_root: '${{github.workspace}}/${{env.source_path}}/toolchains/polly'
     android_ndk_version: 'r18b'
     android_ndk_api_version: '21'
-    android_ndk: 'android_ndk_${{env.android_ndk_version}}'
 
 jobs:
 
@@ -57,6 +55,9 @@ jobs:
           submodules: true
       -
         name: Configure - Cmake
+        env:       
+            android_ndk: 'android_ndk_${{env.android_ndk_version}}'
+            polly_root: '${{github.workspace}}/${{env.source_path}}/toolchains/polly'
         run: |
             if [ -d "${{env.build_path}}" ];
               then rm -Rf ${{env.build_path}};
