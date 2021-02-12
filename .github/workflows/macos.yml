@@ -56,9 +56,6 @@ jobs:
           if [ -d "${{env.build_path}}" ]; 
             then rm -Rf ${{env.build_path}}; 
           fi
-          cd ${{env.source_path}}
-          arch -arm64 ./tools/generate_interfaces.sh
-          cd ..
           mkdir ${{env.build_path}}
           cd ${{env.build_path}}
           export JAVA_HOME=${{env.java_home}}

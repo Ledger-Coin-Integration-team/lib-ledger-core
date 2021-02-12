@@ -9,7 +9,6 @@
 build/
 node_modules/
 project/
-/api/
 /api/djinni/support-lib/*.Makefile
 /api/djinni/support-lib/*.mk
 .DS_Store
