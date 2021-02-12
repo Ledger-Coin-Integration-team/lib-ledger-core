@@ -11,7 +11,7 @@ env:
     source_path: 'libcore_source'
     build_path: 'libcore_build'
     open_ssl_path: '/opt/homebrew/opt/openssl/bin/openssl/'
-    polly_root: '${{github.workspace}}/${{env.source_path}}/toolchains/polly'
+    polly_root: '${{github.workspace}}/${{source_path}}/toolchains/polly'
     ios_version: '11-2'
     deployment_version: '-dep-9-3'
 

@@ -10,7 +10,7 @@ on:
 env:
     source_path: 'libcore_source'
     build_path: 'libcore_build'
-    open_ssl_path: '/opt/homebrew/opt/openssl/bin/openssl/'
+    open_ssl_path: '/opt/homebrew/opt/openssl@1.1'
     build_jar_path: 'jar_build'
 
 jobs:
