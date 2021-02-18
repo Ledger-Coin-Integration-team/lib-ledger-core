@@ -72,7 +72,7 @@ jobs:
           mkdir -p src/main/resources/resources/djinni_native_libs
           cp  ../${{env.build_path}}/core/src/libledger-core.so src/main/resources/resources/djinni_native_libs/libledger-core_jni.so
           sbt package
-          find . -name \*.jar -exec mv {} ${{env.build_path}}/core/src/ledger-lib-core.jar \;
+          find . -name \*.jar -exec mv {} ../${{env.build_path}}/core/src/ledger-lib-core.jar \;
         working-directory: ${{env.build_jar_path}}
       - 
         name : Upload release build files
