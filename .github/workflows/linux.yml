@@ -49,6 +49,7 @@ jobs:
             if [ -d "${{env.build_path}}" ];
               then rm -Rf ${{env.build_path}};
             fi
+            mkdir ${{env.build_jar_path}}
             mkdir ${{env.build_path}}
             cd ${{env.build_path}}
             cmake \
