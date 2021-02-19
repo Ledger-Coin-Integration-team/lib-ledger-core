@@ -50,10 +50,9 @@ jobs:
       -
         name: Configure - Cmake
         env:       
-            android_ndk: 'android_ndk_${{env.android_ndk_version}}'
+            android_ndk: 'android-ndk-${{env.android_ndk_version}}'
             polly_root: '${{github.workspace}}/${{env.source_path}}/toolchains/polly'
         run: |
-            rm -rf "${{env.android_ndk}}"
             if [ ! -d "${{env.android_ndk}}" ]; then 
               wget --quiet https://dl.google.com/android/repository/android-ndk-${{env.android_ndk_version}}-linux-x86_64.zip
               unzip -o android-ndk-${{env.android_ndk_version}}-linux-x86_64.zip
