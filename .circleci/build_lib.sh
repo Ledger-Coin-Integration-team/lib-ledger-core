@@ -49,13 +49,13 @@ function command_ios {
   export XCODE_XCCONFIG_FILE=$POLLY_ROOT/scripts/NoCodeSign.xcconfig
   echo "command_ios with architecture : $ARCH"
   if [ "$ARCH" == "armv7" ]; then
-    export TOOLCHAIN_NAME='ios-nocodesign-14-0-dep-9-3-armv7'
+    export TOOLCHAIN_NAME='ios-nocodesign-14-3-dep-10-0-armv7'
     export OSX_SYSROOT=iphoneos
   elif [ "$ARCH" == "arm64" ]; then
-    export TOOLCHAIN_NAME='ios-nocodesign-14-0-dep-9-3-arm64'
+    export TOOLCHAIN_NAME='ios-nocodesign-14-3-dep-10-0-arm64'
     export OSX_SYSROOT=iphoneos
   else
-    export TOOLCHAIN_NAME='ios-nocodesign-14-0-dep-9-3'
+    export TOOLCHAIN_NAME='ios-nocodesign-14-3-dep-10-0'
     export OSX_SYSROOT=iphonesimulator
     export ARCH=x86_64
     #Copy iphone.cmake which is not forcing CMAKE_OSX_SYSROOT to iphoneos in cache
