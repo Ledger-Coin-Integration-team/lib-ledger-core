@@ -69,7 +69,7 @@ jobs:
               -DCMAKE_BUILD_TYPE:STRING=Release \
               -DBUILD_TESTS=OFF \
               -DTARGET_JNI=ON \
-              -DCMAKE_TOOLCHAIN_FILE=${{env.polly_root}}/android-ndk-${{env.android_ndk_version}}-api-${{env.android_ndk_api_version}}-${{matrix.arch}}-clang-libcxx \
+              -DCMAKE_TOOLCHAIN_FILE=${{env.polly_root}}/android-ndk-${{env.android_ndk_version}}-api-${{env.android_ndk_api_version}}-${{matrix.arch}}-clang-libcxx.cmake \
               ../${{env.source_path}}
       - 
         name: Build - Cmake
