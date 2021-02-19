@@ -64,7 +64,7 @@ jobs:
         name: Build - Cmake
         env:
           polly_root: '${{github.workspace}}/${{env.source_path}}/toolchains/polly'
-          ios_version: '11-2'
+          ios_version: '14-0'
           deployment_version: '-dep-9-3'
         run: |
           if [ -d "${{env.build_path}}" ]; 
