@@ -29,7 +29,7 @@ jobs:
             openssl version
             sbt --version
             java -version
-            if [ ! -d "${{env.android_ndk}}" ]; then 
+            if [ ! -d "${{ github.workspace }}/${{env.android_ndk}}" ]; then 
               wget --quiet https://dl.google.com/android/repository/android-ndk-${{env.android_ndk_version}}-linux-x86_64.zip
               unzip -q android-ndk-${{env.android_ndk_version}}-linux-x86_64.zip -d ${{ github.workspace }}/${{env.android_ndk}}
               rm -rf android-ndk-${{env.android_ndk_version}}-linux-x86_64.zip
