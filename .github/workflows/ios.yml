@@ -75,8 +75,8 @@ jobs:
 
           export POLLY_IOS_BUNDLE_IDENTIFIER='com.ledger.core'
           export XCODE_XCCONFIG_FILE=${{env.polly_root}}/scripts/NoCodeSign.xcconfig
-          if [ ${{matrix.sysroot}} == 'iphonesimulator']; then
-            cp ${{env.source_path}}/tools/build_ios/iphone.cmake ${{env.polly_root}}/os/
+          if [ ${{matrix.sysroot}} == 'iphonesimulator' ]; then
+            cp ../${{env.source_path}}/tools/build_ios/iphone.cmake ${{env.polly_root}}/os/
           fi
           cp ../${{env.source_path}}/tools/build_ios/framework.plist.in .
           cp ../${{env.source_path}}/tools/build_ios/install_name.sh .
