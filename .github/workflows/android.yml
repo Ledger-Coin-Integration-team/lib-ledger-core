@@ -53,11 +53,11 @@ jobs:
             android_ndk: 'android_ndk_${{env.android_ndk_version}}'
             polly_root: '${{github.workspace}}/${{env.source_path}}/toolchains/polly'
         run: |
-
-            wget --quiet https://dl.google.com/android/repository/android-ndk-${{env.android_ndk_version}}-linux-x86_64.zip
-            unzip -q -o android-ndk-${{env.android_ndk_version}}-linux-x86_64.zip
-            rm -rf android-ndk-${{env.android_ndk_version}}-linux-x86_64.zip
-
+            if [ ! -d "${{env.android_ndk}}" ]; then 
+              wget --quiet https://dl.google.com/android/repository/android-ndk-${{env.android_ndk_version}}-linux-x86_64.zip
+              unzip -q -o android-ndk-${{env.android_ndk_version}}-linux-x86_64.zip
+              rm -rf android-ndk-${{env.android_ndk_version}}-linux-x86_64.zip
+            fi
             if [ -d "${{env.build_path}}" ];
               then rm -Rf ${{env.build_path}};
             fi
