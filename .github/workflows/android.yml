@@ -29,12 +29,6 @@ jobs:
             openssl version
             sbt --version
             java -version
-            if [ ! -d "${{ github.workspace }}/${{env.android_ndk}}" ]; then 
-              wget --quiet https://dl.google.com/android/repository/android-ndk-${{env.android_ndk_version}}-linux-x86_64.zip
-              unzip -q android-ndk-${{env.android_ndk_version}}-linux-x86_64.zip -d ${{ github.workspace }}/${{env.android_ndk}}
-              rm -rf android-ndk-${{env.android_ndk_version}}-linux-x86_64.zip
-            fi
-
 
   ###########
   # RELEASE #
@@ -59,6 +53,11 @@ jobs:
             android_ndk: 'android_ndk_${{env.android_ndk_version}}'
             polly_root: '${{github.workspace}}/${{env.source_path}}/toolchains/polly'
         run: |
+            if [ ! -d "${{env.android_ndk}}" ]; then 
+              wget --quiet https://dl.google.com/android/repository/android-ndk-${{env.android_ndk_version}}-linux-x86_64.zip
+              unzip -q android-ndk-${{env.android_ndk_version}}-linux-x86_64.zip -d ${{env.android_ndk}}
+              rm -rf android-ndk-${{env.android_ndk_version}}-linux-x86_64.zip
+            fi
             if [ -d "${{env.build_path}}" ];
               then rm -Rf ${{env.build_path}};
             fi
@@ -68,7 +67,6 @@ jobs:
             cmake \
               -DCMAKE_BUILD_TYPE:STRING=Release \
               -DBUILD_TESTS=OFF \
-              -DCMAKE_ANDROID_NDK=${{github.workspace}}/${{env.android_ndk}} \
               -DTARGET_JNI=ON \
               -DCMAKE_TOOLCHAIN_FILE=${{env.polly_root}}/android-ndk-${{env.android_ndk_version}}-api-${{env.android_ndk_api_version}}-${{matrix.arch}}-clang-libcxx.cmake \
               ../${{env.source_path}}
