@@ -55,7 +55,7 @@ jobs:
         run: |
             if [ ! -d "${{env.android_ndk}}" ]; then 
               wget --quiet https://dl.google.com/android/repository/android-ndk-${{env.android_ndk_version}}-linux-x86_64.zip
-              unzip -o android-ndk-${{env.android_ndk_version}}-linux-x86_64.zip
+              unzip -o -q android-ndk-${{env.android_ndk_version}}-linux-x86_64.zip
               rm -rf android-ndk-${{env.android_ndk_version}}-linux-x86_64.zip
             fi
             if [ -d "${{env.build_path}}" ];
@@ -85,6 +85,6 @@ jobs:
             ${{env.build_path}}/core/src/libledger-core.so
       - 
         name: Clean workspace
-        if: ${{ always() }}
+        if: ${{ never() }}
         run: |
           rm -rf "${{github.workspace}}/${{env.build_path}}"
