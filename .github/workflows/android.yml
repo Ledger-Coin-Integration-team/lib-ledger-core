@@ -85,6 +85,6 @@ jobs:
             ${{env.build_path}}/core/src/libledger-core.so
       - 
         name: Clean workspace
-        if: ${{ never() }}
+        if: ${{ success() }}
         run: |
           rm -rf "${{github.workspace}}/${{env.build_path}}"
