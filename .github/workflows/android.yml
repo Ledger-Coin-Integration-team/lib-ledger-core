@@ -72,6 +72,8 @@ jobs:
               ../${{env.source_path}}
       - 
         name: Build - Cmake
+        env:       
+            android_ndk: 'android-ndk-${{env.android_ndk_version}}'
         run: |
           export ANDROID_NDK_${{env.android_ndk_version}}='${{github.workspace}}/${{env.android_ndk}}'
           cmake --build . --config Release -- -j$(nproc)
