@@ -73,6 +73,7 @@ jobs:
       - 
         name: Build - Cmake
         run: |
+          export ANDROID_NDK_${{env.android_ndk_version}}='${{github.workspace}}/${{env.android_ndk}}'
           cmake --build . --config Release -- -j$(nproc)
         working-directory: ${{env.build_path}}
       - 
@@ -85,6 +86,6 @@ jobs:
             ${{env.build_path}}/core/src/libledger-core.so
       - 
         name: Clean workspace
-        if: ${{ success() }}
+        if: ${{ always() }}
         run: |
           rm -rf "${{github.workspace}}/${{env.build_path}}"
